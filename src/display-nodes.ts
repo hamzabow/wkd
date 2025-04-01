@@ -9,7 +9,11 @@ interface State {
 }
 
 function displayPath(path: [string, Node][], currentSequence: string) {
-  if (path.length === 0) return;
+  if (path.length === 0) {
+    console.log();
+    console.log(paintGray("⸺".repeat(30)));
+    return;
+  }
 
   const keyChain = path.map(([key]) => key[0]).join("");
   const pathParts = path.map(([_, node]) => paintGray(node.name));
@@ -108,8 +112,8 @@ export async function displayNodes() {
     displaySubkeys(state.availableNodes, state.currentSequence);
 
     const key = await handleKeyPress();
-    if (key === "\x1b") {
-      // ESC key
+    if (key === "\x1b" || key === "q") {
+      // ESC or q key
       break;
     }
 
