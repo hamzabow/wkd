@@ -53,10 +53,9 @@ type ShellAction = {
 }
 
 type ActionBase = {
-  name: string
   closeAfterAction?: boolean // TODO: should be true by default
 }
-type Action = ActionBase & (WebAction | FileSystemAction | ShellAction)
+export type Action = ActionBase & (WebAction | FileSystemAction | ShellAction)
 
 type NodePrefix = {
   type: Satisfies<NodeType, 'prefix'>
@@ -78,7 +77,7 @@ export type Config = {
   nodes: ConfigNodes
 }
 
-export type { Action, Node }
+export type { Node }
 
 // ---
 // ¹ maybe we could have added 'powershell', which is Windows Powershell,

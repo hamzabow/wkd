@@ -1,44 +1,42 @@
 import config from './config/config.ts'
+import { Word } from './config/words.ts'
 import { paintGray, paintGreen } from './paint.ts'
 import { Action, Node } from './types/types.ts'
+import { sleep } from './util.ts'
 
-interface State {
-  currentSequence: string
-  availableNodes: [string, Node][]
-  path: [string, Node][]
-}
+let seq = ''
+const ndc = config.nodes
 
-function displayPath(path: [string, Node][], currentSequence: string) {
-  if (path.length === 0) {
+function displayPath() {
+  if (seq.length === 0) {
     console.log()
-    console.log(paintGray('⸺'.repeat(30)))
-    return
+  } else {
+    let subStr = ''
+    const pathStrParts: string[] = []
+    for (const char of seq) {
+      subStr += char
+      if (subStr in ndc) {
+        pathStrParts.push(ndc[subStr as Word].name)
+      } else {
+        pathStrParts.push('Prefix')
+      }
+    }
+    const pathStr = paintGray(pathStrParts.join(' / '))
+    console.log('  ' + paintGreen(seq) + ' - ' + pathStr)
   }
-
-  const keyChain = path.map(([key]) => key[0]).join('')
-  const pathParts = path.map(([_, node]) => paintGray(node.name))
-  const pathStr = pathParts.join(' / ')
-
-  console.log('  ' + paintGreen(keyChain) + ' - ' + pathStr)
   console.log(paintGray('⸺'.repeat(30)))
 }
 
-function displaySubkeys(nodes: [string, Node][], currentSequence: string) {
-  for (const [key, node] of nodes) {
-    const remainingChars = key.slice(currentSequence.length)
-    const prefix = key.slice(0, currentSequence.length)
-    const nextChar = remainingChars ? `[${remainingChars[0]}]` : ''
-    const rest = remainingChars ? remainingChars.slice(1) : ''
+function displaySubkeys() {
+  const wordNodePairs = Object.entries(ndc).filter(([word]) =>
+    word.startsWith(seq) && word.length !== seq.length
+  )
 
-    console.log(`  ${prefix}${nextChar}${rest} - ${node.name}`)
+  for (const [key, node] of wordNodePairs) {
+    const char = key.slice(seq.length)
+
+    console.log(`  ${char} - ${node.name}`)
   }
-}
-
-function filterNodesBySequence(
-  nodes: [string, Node][],
-  sequence: string,
-): [string, Node][] {
-  return nodes.filter(([key]) => key.startsWith(sequence))
 }
 
 async function handleKeyPress(): Promise<string> {
@@ -100,16 +98,10 @@ async function executeAction(action: Action) {
 }
 
 export async function displayNodes() {
-  const state: State = {
-    currentSequence: '',
-    availableNodes: Object.entries(config.nodes),
-    path: [],
-  }
-
   while (true) {
     console.clear()
-    displayPath(state.path, state.currentSequence)
-    displaySubkeys(state.availableNodes, state.currentSequence)
+    displayPath()
+    displaySubkeys()
 
     const key = await handleKeyPress()
     if (key === '\x1b' || key === 'q') {
@@ -119,30 +111,14 @@ export async function displayNodes() {
 
     if (!key) continue // Skip if no valid key was pressed
 
-    const newSequence = state.currentSequence + key
-    const filteredNodes = filterNodesBySequence(
-      state.availableNodes,
-      newSequence,
-    )
-
-    if (filteredNodes.length === 0) {
-      // No matches found, reset sequence
-      state.currentSequence = ''
-      state.availableNodes = Object.entries(config.nodes)
-      state.path = []
-      continue
+    const newSeq = seq + key
+    if (newSeq in ndc) {
+      if (ndc[newSeq as Word].type !== 'action') {
+        seq = newSeq
+        continue
+      }
+      console.log('executing action')
+      return
     }
-
-    // Check if we have an exact match for an action
-    const exactMatch = filteredNodes.find(([key]) => key === newSequence)
-    if (exactMatch && exactMatch[1].type === 'action') {
-      await executeAction(exactMatch[1].action)
-      break
-    }
-
-    // Update state for next iteration
-    state.currentSequence = newSequence
-    state.availableNodes = filteredNodes
-    state.path = [...state.path, exactMatch || filteredNodes[0]]
   }
 }
