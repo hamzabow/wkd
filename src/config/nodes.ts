@@ -3,7 +3,7 @@ import { ConfigNodes } from '../types/types.ts'
 export default {
   pi: {
     type: 'prefix',
-    name: 'some name',
+    name: 'Prefix X',
   },
   pid: {
     type: 'action',
@@ -11,7 +11,7 @@ export default {
     action: {
       name: 'Open Google',
       type: 'web',
-      url: 'Hello World',
+      url: 'https://google.com',
     },
   },
 } satisfies ConfigNodes
