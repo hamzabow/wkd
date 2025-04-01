@@ -74,14 +74,6 @@ export type Config = {
   nodes: ConfigNodes
 }
 
-const config = {
-  nodes: {
-    's': {
-      type,
-    },
-  },
-} satisfies Config
-
 // ---
 // ¹ maybe we could have added 'powershell', which is Windows Powershell,
 //   which is different than 'pwsh' -powershell v7), but I don't use it much,

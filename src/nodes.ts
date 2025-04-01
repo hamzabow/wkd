@@ -1,4 +1,4 @@
-import { ConfigNodes } from './types.ts'
+import { ConfigNodes } from './types/types.ts'
 
 export default {
   pi: {
