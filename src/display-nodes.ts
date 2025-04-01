@@ -16,7 +16,7 @@ function displayPath(path: [string, Node][], currentSequence: string) {
   const pathStr = pathParts.join(" / ");
 
   console.log("  " + paintGreen(keyChain) + " - " + pathStr);
-  console.log(paintGray("-".repeat(30)));
+  console.log(paintGray("⸺".repeat(30)));
 }
 
 function displaySubkeys(nodes: [string, Node][], currentSequence: string) {
@@ -58,6 +58,12 @@ async function handleKeyPress(): Promise<string> {
     if (key === "\x1b") {
       // ESC
       return key;
+    }
+
+    // Handle Ctrl+C
+    if (key === "\x03") {
+      console.log("Exiting...");
+      Deno.exit(130); // 128 + SIGINT = 130
     }
 
     // Only return printable characters
