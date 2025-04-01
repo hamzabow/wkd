@@ -38,24 +38,21 @@ function filterNodesBySequence(
 }
 
 async function handleKeyPress(): Promise<string> {
-  // Set raw mode to read keys without Enter
-  const decoder = new TextDecoder();
-
-  // Save current terminal settings
-  const originalMode = await new Deno.Command("stty", {
-    args: ["-g"],
-    stdout: "piped",
-  }).output();
-
-  // Set raw mode
-  await new Deno.Command("stty", {
-    args: ["raw", "-echo", "min", "0", "time", "0"],
-  }).output();
+  // Enable raw mode on stdin to capture key presses immediately
+  Deno.stdin.setRaw(true);
 
   try {
+    // Allocate a buffer for a single byte
     const buffer = new Uint8Array(1);
-    await Deno.stdin.read(buffer);
-    const key = decoder.decode(buffer);
+
+    // Wait for one byte (key press) from stdin
+    const n = await Deno.stdin.read(buffer);
+    if (n === null) {
+      return "";
+    }
+
+    // Decode the captured byte to a string
+    const key = new TextDecoder().decode(buffer);
 
     // Handle special keys
     if (key === "\x1b") {
@@ -70,10 +67,8 @@ async function handleKeyPress(): Promise<string> {
 
     return ""; // Ignore other keys
   } finally {
-    // Restore original terminal settings
-    await new Deno.Command("stty", {
-      args: [decoder.decode(originalMode.stdout)],
-    }).output();
+    // Always reset stdin to normal mode
+    Deno.stdin.setRaw(false);
   }
 }
 
