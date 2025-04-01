@@ -50,6 +50,7 @@ type ShellAction = {
 }
 
 type ActionBase = {
+  name: string
   closeAfterAction?: boolean // TODO: should be true by default
 }
 type Action = ActionBase & (WebAction | FileSystemAction | ShellAction)

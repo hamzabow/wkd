@@ -1,7 +1,7 @@
-import config from './config/config.ts'
+import { displayNodes } from './display-nodes.ts'
 
 function main() {
-  console.log(config)
+  displayNodes()
 }
 
 if (import.meta.main) {

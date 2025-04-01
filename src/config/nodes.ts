@@ -5,4 +5,13 @@ export default {
     type: 'prefix',
     name: 'some name',
   },
+  pid: {
+    type: 'action',
+    name: 'lsls',
+    action: {
+      name: 'Open Google',
+      type: 'web',
+      url: 'Hello World',
+    },
+  },
 } satisfies ConfigNodes
