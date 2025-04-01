@@ -1,4 +1,4 @@
-import config from './config.ts'
+import config from './config/config.ts'
 
 function main() {
   console.log(config)
