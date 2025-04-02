@@ -15,7 +15,11 @@ type ActionType = (typeof actionTypes)[number]
 // that type and here is here below (replace `string`).
 type ChromeProfileCustomName = string
 
+type ActionBase = {
+  closeAfterAction?: boolean // TODO: should be true by default
+}
 type WebAction =
+  & ActionBase
   & {
     type: Satisfies<ActionType, 'web'>
     url: string // TODO: 'https://' should be optional
@@ -31,7 +35,7 @@ type WebAction =
     }
   )
 
-type FileSystemAction = {
+type FileSystemAction = ActionBase & {
   type: Satisfies<ActionType, 'filesystem'>
   subType:
     | 'open in File Explorer'
@@ -47,22 +51,19 @@ const environmentCommandTypes = {
   linux: ['bash', 'fish', 'nu'],
 } as const
 
-type ShellAction = {
+type ShellAction = ActionBase & {
   type: Satisfies<ActionType, 'shell'>
   shell?: (typeof environmentCommandTypes)['windows'][number] // Default is WSL
   command: string
 }
 
-type ActionBase = {
-  closeAfterAction?: boolean // TODO: should be true by default
-}
-export type Action = ActionBase & (WebAction | FileSystemAction | ShellAction)
+export type Action = WebAction | FileSystemAction | ShellAction
 
 type NodePrefix = {
   type: Satisfies<NodeType, 'prefix'>
 }
 
-type NodeAction = { type: Satisfies<NodeType, 'action'>; action: Action }
+export type NodeAction = { type: Satisfies<NodeType, 'action'>; action: Action }
 
 type NodeBase = {
   name: string

@@ -1,7 +1,7 @@
 import config from '../config.ts'
 import { Word } from './words.ts'
 import { paintBlue, paintGray, paintGreen, paintYellow } from './paint.ts'
-import { Action, Node } from './types/types.ts'
+import { Action, Node, NodeAction } from './types/types.ts'
 import { sleep } from './util.ts'
 
 let seq = ''
@@ -13,6 +13,7 @@ type FileSystemAction = Extract<Action, { type: 'filesystem' }>
 type ShellAction = Extract<Action, { type: 'shell' }>
 
 function displayPath() {
+  console.log()
   if (seq.length === 0) {
     console.log()
   } else {
@@ -141,7 +142,6 @@ async function handleKeyPress(): Promise<string> {
 }
 
 async function executeWebAction(action: WebAction): Promise<void> {
-  console.log('Executing web action:', action.url)
   const urlToOpen = action.url.startsWith('http')
     ? action.url
     : `https://${action.url}`
@@ -254,7 +254,8 @@ async function executeShellAction(action: ShellAction): Promise<void> {
   }
 }
 
-async function executeAction(action: Action) {
+async function executeAction(nodeAction: NodeAction) {
+  const action = nodeAction.action
   switch (action.type) {
     case 'web':
       await executeWebAction(action as WebAction)
@@ -293,7 +294,7 @@ export async function displayNodes() {
     const newSeq = seq + key
     if (newSeq in ndc && ndc[newSeq as Word].type === 'action') {
       console.log(`Executing action: ${ndc[newSeq as Word].name}`)
-      await executeAction(ndc[newSeq as Word] as Node & Action)
+      await executeAction(ndc[newSeq as Word] as NodeAction)
       await sleep(2000)
       return
     }
