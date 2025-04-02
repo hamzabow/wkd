@@ -1,9 +1,9 @@
 import { displayNodes } from './display-nodes.ts'
 
-function main() {
-  displayNodes()
+async function main() {
+  await displayNodes()
 }
 
 if (import.meta.main) {
-  main()
+  await main()
 }

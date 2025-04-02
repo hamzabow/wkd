@@ -1,6 +1,6 @@
 import config from './config/config.ts'
 import { Word } from './config/words.ts'
-import { paintGray, paintGreen } from './paint.ts'
+import { paintBlue, paintGray, paintGreen, paintYellow } from './paint.ts'
 import { Action, Node } from './types/types.ts'
 import { sleep } from './util.ts'
 
@@ -35,7 +35,12 @@ function displaySubkeys() {
   for (const [key, node] of wordNodePairs) {
     const char = key.slice(seq.length)
 
-    console.log(`  ${char} - ${node.name}`)
+    const paint = node.type === 'prefix' ? paintBlue : paintYellow
+    console.log(
+      `  ${paintGreen(char)} ➜ ${node.type === 'prefix' ? '+' : ''}${
+        paint(node.name)
+      }`,
+    )
   }
 }
 
@@ -62,6 +67,10 @@ async function handleKeyPress(): Promise<string> {
       return key
     }
 
+    if (key === '\x08') {
+      console.log('its backspace')
+    }
+
     // Handle Ctrl+C
     if (key === '\x03') {
       console.log('Exiting...')
@@ -73,7 +82,8 @@ async function handleKeyPress(): Promise<string> {
       return key
     }
 
-    return '' // Ignore other keys
+    return key
+    // return '' // Ignore other keys
   } finally {
     // Always reset stdin to normal mode
     Deno.stdin.setRaw(false)
@@ -107,6 +117,14 @@ export async function displayNodes() {
     if (key === '\x1b' || key === 'q') {
       // ESC or q key
       break
+    }
+
+    if (key === '\x7f') {
+      // Backspace key
+      if (seq.length !== 0) {
+        seq = seq.slice(0, -1)
+      }
+      continue
     }
 
     if (!key) continue // Skip if no valid key was pressed

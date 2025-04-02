@@ -25,4 +25,12 @@ export default {
       subType: 'Open in File Explorer',
     },
   },
+  doc: {
+    type: 'action',
+    name: 'Open Documents',
+    action: {
+      type: 'filesystem',
+      subType: 'Open in File Explorer',
+    },
+  },
 } satisfies ConfigNodes
