@@ -175,13 +175,11 @@ export async function displayNodes() {
     if (!key) continue // Skip if no valid key was pressed
 
     const newSeq = seq + key
-    if (newSeq in ndc) {
-      if (ndc[newSeq as Word].type !== 'action') {
-        seq = newSeq
-        continue
-      }
+    if (newSeq in ndc && ndc[newSeq as Word].type === 'action') {
       console.log('executing action')
       return
     }
+    seq = newSeq
+    continue
   }
 }
