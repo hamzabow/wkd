@@ -1,5 +1,5 @@
 import config from '../config.ts'
-import { Word } from './config/words.ts'
+import { Word } from './words.ts'
 import { paintBlue, paintGray, paintGreen, paintYellow } from './paint.ts'
 import { Action, Node } from './types/types.ts'
 import { sleep } from './util.ts'
