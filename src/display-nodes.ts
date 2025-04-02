@@ -148,18 +148,27 @@ async function executeWebAction(action: WebAction): Promise<void> {
   const browser = action.browser || 'chrome'
   let browserPath = ''
 
+  // Default to new window unless explicitly set to false
+  const openInNewWindow = action.newWindow !== false
+  let newWindowFlag = ''
+
   if (browser === 'chrome') {
     browserPath = '/mnt/c/Program\\ Files/Google/Chrome/Application/chrome.exe'
+    newWindowFlag = openInNewWindow ? ' --new-window' : ''
     // Check if profile property exists (only applicable for Chrome)
     const profileArg = 'profile' in action && action.profile
       ? ` --profile-directory="${action.profile}"`
       : ''
-    browserPath += profileArg
+    browserPath += profileArg + newWindowFlag
   } else if (browser === 'firefox') {
     browserPath = '/mnt/c/Program\\ Files/Mozilla\\ Firefox/firefox.exe'
+    newWindowFlag = openInNewWindow ? ' -new-window' : ''
+    browserPath += newWindowFlag
   } else if (browser === 'edge') {
     browserPath =
       '/mnt/c/Program\\ Files\\ \\(x86\\)/Microsoft/Edge/Application/msedge.exe'
+    newWindowFlag = openInNewWindow ? ' --new-window' : ''
+    browserPath += newWindowFlag
   }
 
   if (browserPath) {
@@ -295,7 +304,6 @@ export async function displayNodes() {
     if (newSeq in ndc && ndc[newSeq as Word].type === 'action') {
       console.log(`Executing action: ${ndc[newSeq as Word].name}`)
       await executeAction(ndc[newSeq as Word] as NodeAction)
-      await sleep(2000)
       return
     }
     seq = newSeq

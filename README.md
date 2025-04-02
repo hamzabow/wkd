@@ -54,25 +54,17 @@ If you've defined a key sequence "gh" to open GitHub, typing "g" followed by "h"
 
 ## Configuration
 
-The application comes with no predefined shortcuts. You'll need to define your own in the `src/config/nodes.ts` file:
+The application comes with no predefined shortcuts. You'll need to define your own in `nodes.ts` and `config.ts` files:
 
-```typescript
-export default {
-  g: {
-    type: 'prefix',
-    name: 'Git Related',
-  },
-  gh: {
-    type: 'action',
-    name: 'Open GitHub',
-    action: {
-      type: 'web',
-      url: 'https://github.com',
-    },
-  },
-  // More key sequences and actions...
-} satisfies ConfigNodes
-```
+1. Copy the example files to create your own configuration:
+   ```bash
+   cp example.nodes.ts nodes.ts
+   cp example.config.ts config.ts
+   ```
+
+2. Edit these files according to your needs.
+
+See the [Configuration Guide](CONFIGURATION.md) for detailed instructions and examples.
 
 ### Action Types
 
