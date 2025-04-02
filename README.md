@@ -1,6 +1,8 @@
-# WhichKey for Deno (wkd)
+# WhichKey Deno (wkd)
 
 A simple terminal-based key sequence launcher inspired by "whichkey" plugins found in text editors like Emacs and Neovim. `wkd` allows you to define and execute various actions through memorable key sequences.
+
+Built with TypeScript and Deno.
 
 ## Overview
 
@@ -108,4 +110,4 @@ See the [Configuration Guide](CONFIGURATION.md) for detailed instructions and ex
 
 ## License
 
-[MIT](LICENSE) 
+[MIT](LICENSE)
