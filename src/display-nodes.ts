@@ -15,7 +15,7 @@ type ShellAction = Extract<Action, { type: 'shell' }>
 function displayPath() {
   console.log()
   if (seq.length === 0) {
-    console.log()
+    console.log(paintGray('  <ROOT>'))
   } else {
     let subStr = ''
     const pathStrParts: string[] = []
