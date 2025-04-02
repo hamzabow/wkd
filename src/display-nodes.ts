@@ -32,13 +32,57 @@ function displaySubkeys() {
     word.startsWith(seq) && word.length !== seq.length
   )
 
-  for (const [key, node] of wordNodePairs) {
-    const char = key.slice(seq.length)
+  const uniqueCharactersToPrint = Array.from(
+    new Set(
+      wordNodePairs.map(([word]) => word.slice(seq.length, seq.length + 1)),
+    ),
+  )
+  type El = { name: string; char: string; type: 'action' | 'prefix' }
+  const els: El[] = []
+  for (const char of uniqueCharactersToPrint) {
+    let isNamedPrefixFound = false
+    let nodeName: string | null = null
+    for (const [word, node] of wordNodePairs) {
+      if (
+        node.type === 'prefix' &&
+        word.length === seq.length + 1 &&
+        word.slice(seq.length, seq.length + 1) === char
+      ) {
+        isNamedPrefixFound = true
+        nodeName = node.name
+        break
+      }
+    }
+    if (isNamedPrefixFound) {
+      els.push({ type: 'prefix', name: nodeName as string, char })
+    } else {
+      let isElForCharAdded = false
+      for (const [word, node] of wordNodePairs) {
+        if (isElForCharAdded) {
+          break
+        }
+        if (
+          word.slice(seq.length, seq.length + 1) === char
+        ) {
+          isElForCharAdded = true
+          if (node.type === 'action' && word.length > (seq.length + 1)) { // implicit prefix
+            els.push({ type: 'prefix', name: 'Prefix', char })
+          } else if (node.type === 'action' && word.length === seq.length + 1) {
+            els.push({ type: 'action', name: node.name, char })
+          } else if (node.type === 'prefix') {
+            els.push({ type: 'prefix', name: 'Prefix', char })
+          }
+        }
+      }
+    }
+    isNamedPrefixFound = false
+  }
 
-    const paint = node.type === 'prefix' ? paintBlue : paintYellow
+  for (const el of els) {
+    const paint = el.type === 'prefix' ? paintBlue : paintYellow
     console.log(
-      `  ${paintGreen(char)} ➜ ${node.type === 'prefix' ? '+' : ''}${
-        paint(node.name)
+      `  ${paintGreen(el.char)} ➜  ${el.type === 'prefix' ? '+' : ''}${
+        paint(el.name)
       }`,
     )
   }
@@ -67,10 +111,6 @@ async function handleKeyPress(): Promise<string> {
       return key
     }
 
-    if (key === '\x08') {
-      console.log('its backspace')
-    }
-
     // Handle Ctrl+C
     if (key === '\x03') {
       console.log('Exiting...')
@@ -82,8 +122,13 @@ async function handleKeyPress(): Promise<string> {
       return key
     }
 
-    return key
-    // return '' // Ignore other keys
+    const otherAcceptedKeys = ['\x7f']
+
+    if (otherAcceptedKeys.includes(key)) {
+      return key
+    } else {
+      return '' // Ignore other keys
+    }
   } finally {
     // Always reset stdin to normal mode
     Deno.stdin.setRaw(false)
