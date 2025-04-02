@@ -1,4 +1,4 @@
-import { displayNodes } from './display-nodes.ts'
+import { displayNodes } from './src/display-nodes.ts'
 
 async function main() {
   await displayNodes()
