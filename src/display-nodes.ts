@@ -306,7 +306,9 @@ export async function displayNodes() {
       await executeAction(ndc[newSeq as Word] as NodeAction)
       return
     }
-    seq = newSeq
+    if (Object.keys(ndc).filter((word) => word.startsWith(newSeq)).length > 0) {
+      seq = newSeq
+    }
     continue
   }
 }
