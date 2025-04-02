@@ -7,6 +7,11 @@ import { sleep } from './util.ts'
 let seq = ''
 const ndc = config.nodes
 
+// Define specific action types based on the Action union type
+type WebAction = Extract<Action, { type: 'web' }>
+type FileSystemAction = Extract<Action, { type: 'filesystem' }>
+type ShellAction = Extract<Action, { type: 'shell' }>
+
 function displayPath() {
   if (seq.length === 0) {
     console.log()
@@ -135,19 +140,130 @@ async function handleKeyPress(): Promise<string> {
   }
 }
 
+async function executeWebAction(action: WebAction): Promise<void> {
+  console.log('Executing web action:', action.url)
+  const urlToOpen = action.url.startsWith('http')
+    ? action.url
+    : `https://${action.url}`
+  const browser = action.browser || 'chrome'
+  let browserPath = ''
+
+  if (browser === 'chrome') {
+    browserPath = '/mnt/c/Program\\ Files/Google/Chrome/Application/chrome.exe'
+    // Check if profile property exists (only applicable for Chrome)
+    const profileArg = 'profile' in action && action.profile
+      ? ` --profile-directory="${action.profile}"`
+      : ''
+    browserPath += profileArg
+  } else if (browser === 'firefox') {
+    browserPath = '/mnt/c/Program\\ Files/Mozilla\\ Firefox/firefox.exe'
+  } else if (browser === 'edge') {
+    browserPath =
+      '/mnt/c/Program\\ Files\\ \\(x86\\)/Microsoft/Edge/Application/msedge.exe'
+  }
+
+  if (browserPath) {
+    try {
+      const command = new Deno.Command('bash', {
+        args: ['-c', `${browserPath} "${urlToOpen}"`],
+      })
+      await command.output()
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(`Failed to open URL: ${error.message}`)
+      } else {
+        console.error(`Failed to open URL: ${String(error)}`)
+      }
+    }
+  }
+}
+
+async function executeFileSystemAction(
+  action: FileSystemAction,
+): Promise<void> {
+  console.log('Executing filesystem action:', action.subType, action.path)
+  try {
+    let fsCommand = ''
+    switch (action.subType) {
+      case 'open in File Explorer':
+        fsCommand = `explorer.exe "$(wslpath -w "${action.path}")"`
+        break
+      case 'open in yazi':
+        fsCommand = `yazi "${action.path}"`
+        break
+      case 'open in neovim oil plugin':
+        fsCommand = `nvim "${action.path}"`
+        break
+      case 'open in fish shell':
+        fsCommand = `fish -c "cd \\"${action.path}\\" && exec fish"`
+        break
+      case 'open in pwsh':
+        fsCommand = `pwsh -NoExit -Command "cd \\"${action.path}\\""`
+        break
+    }
+
+    if (fsCommand) {
+      const command = new Deno.Command('bash', {
+        args: ['-c', fsCommand],
+      })
+      await command.output()
+    }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(`Failed to execute filesystem action: ${error.message}`)
+    } else {
+      console.error(`Failed to execute filesystem action: ${String(error)}`)
+    }
+  }
+}
+
+async function executeShellAction(action: ShellAction): Promise<void> {
+  console.log('Executing shell action:', action.command)
+  try {
+    const shell = action.shell || 'wsl'
+    let shellCommand
+
+    if (shell === 'wsl') {
+      shellCommand = new Deno.Command('bash', {
+        args: ['-c', action.command],
+      })
+    } else if (shell === 'cmd') {
+      shellCommand = new Deno.Command('cmd.exe', {
+        args: ['/c', action.command],
+      })
+    } else if (shell === 'pwsh') {
+      shellCommand = new Deno.Command('powershell.exe', {
+        args: ['-Command', action.command],
+      })
+    }
+
+    if (shellCommand) {
+      const { stdout, stderr } = await shellCommand.output()
+      console.log('Command output:')
+      console.log(new TextDecoder().decode(stdout))
+      if (stderr.length > 0) {
+        console.error(new TextDecoder().decode(stderr))
+      }
+    }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(`Failed to execute shell command: ${error.message}`)
+    } else {
+      console.error(`Failed to execute shell command: ${String(error)}`)
+    }
+  }
+}
+
 async function executeAction(action: Action) {
   switch (action.type) {
     case 'web':
-      // TODO: Implement web action execution
-      console.log('Executing web action:', action)
+      await executeWebAction(action as WebAction)
       break
     case 'filesystem':
-      // TODO: Implement filesystem action execution
-      console.log('Executing filesystem action:', action)
+      await executeFileSystemAction(action as FileSystemAction)
       break
     case 'shell':
-      // TODO: Implement shell action execution
-      console.log('Executing shell action:', action)
+      await executeShellAction(action as ShellAction)
       break
   }
 }
@@ -176,7 +292,9 @@ export async function displayNodes() {
 
     const newSeq = seq + key
     if (newSeq in ndc && ndc[newSeq as Word].type === 'action') {
-      console.log('executing action')
+      console.log(`Executing action: ${ndc[newSeq as Word].name}`)
+      await executeAction(ndc[newSeq as Word] as Node & Action)
+      await sleep(2000)
       return
     }
     seq = newSeq

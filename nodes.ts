@@ -22,7 +22,8 @@ export default {
     name: 'Open Downloads',
     action: {
       type: 'filesystem',
-      subType: 'Open in File Explorer',
+      subType: 'open in File Explorer',
+      path: '/mnt/c/Users/hamza/Downloads',
     },
   },
   doc: {
@@ -30,7 +31,8 @@ export default {
     name: 'Open Documents',
     action: {
       type: 'filesystem',
-      subType: 'Open in File Explorer',
+      subType: 'open in File Explorer',
+      path: '/mnt/c/Users/hamza/Documents',
     },
   },
 } satisfies ConfigNodes

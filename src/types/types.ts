@@ -34,11 +34,12 @@ type WebAction =
 type FileSystemAction = {
   type: Satisfies<ActionType, 'filesystem'>
   subType:
-    | 'Open in File Explorer'
+    | 'open in File Explorer'
     | 'open in yazi'
-    | 'open in neovim oil'
+    | 'open in neovim oil plugin'
     | 'open in fish shell'
     | 'open in pwsh'
+  path: string
 }
 
 const environmentCommandTypes = {
@@ -73,7 +74,7 @@ type Node = NodeBase & (NodePrefix | NodeAction)
 export type ConfigNodes = Record<string, Node>
 
 export type Config = {
-  settings: any
+  settings: Record<string, string>
   nodes: ConfigNodes
 }
 
