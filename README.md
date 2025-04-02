@@ -1,10 +1,10 @@
-# WhichKey for Deno (WKD)
+# WhichKey for Deno (wkd)
 
-A simple terminal-based key sequence launcher inspired by "whichkey" plugins found in text editors like Emacs and Neovim. WKD allows you to define and execute various actions through memorable key sequences.
+A simple terminal-based key sequence launcher inspired by "whichkey" plugins found in text editors like Emacs and Neovim. `wkd` allows you to define and execute various actions through memorable key sequences.
 
 ## Overview
 
-WKD provides a framework for creating your own keyboard shortcuts to perform common actions, such as:
+`wkd` provides a framework for creating your own keyboard shortcuts to perform common actions, such as:
 
 - Opening URLs in various browsers
 - Opening files or folders in different applications
@@ -13,7 +13,7 @@ WKD provides a framework for creating your own keyboard shortcuts to perform com
 
 ## Inspiration
 
-This project draws inspiration from "whichkey" plugins in text editors like Emacs and Neovim. While those plugins help users remember and execute keybindings within the editor, WKD brings similar functionality to the terminal as a standalone application.
+This project draws inspiration from "whichkey" plugins in text editors like Emacs and Neovim. While those plugins help users remember and execute keybindings within the editor, `wkd` brings similar functionality to the terminal as a standalone application.
 
 ## Features
 

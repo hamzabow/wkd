@@ -1,4 +1,4 @@
-import { Config } from './types/types.ts'
+import { Config } from './src/types/types.ts'
 import nodes from './nodes.ts'
 
 export default {
