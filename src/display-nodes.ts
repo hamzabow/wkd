@@ -203,13 +203,15 @@ async function executeFileSystemAction(
           `wt.exe --maximized -p "Ubuntu" -- wsl -d Ubuntu --cd "${action.path}" -e '/home/${username}/.cargo/bin/yazi'`
         break
       case 'open in neovim oil plugin':
-        fsCommand = `nvim "${action.path}"`
+        const randomSessionId = Math.floor(Math.random() * 10000)
+        fsCommand =
+          `wt.exe --maximized -p "Ubuntu" -- wsl -d Ubuntu -e bash -c "tmux new-session -A -s neovim-oil-${randomSessionId} '/opt/nvim-linux64/bin/nvim +\\"Oil\\" \\"${action.path}\\"'"`
         break
       case 'open in fish shell':
         fsCommand = `fish -c "cd \\"${action.path}\\" && exec fish"`
         break
       case 'open in pwsh':
-        fsCommand = `pwsh -NoExit -Command "cd \\"${action.path}\\""`
+        fsCommand = `pwsh.exe -NoExit -Command "cd \\"${action.path}\\""`
         break
     }
 
