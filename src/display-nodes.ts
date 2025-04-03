@@ -198,7 +198,9 @@ async function executeFileSystemAction(
         fsCommand = `explorer.exe "$(wslpath -w "${action.path}")"`
         break
       case 'open in yazi':
-        fsCommand = `yazi "${action.path}"`
+        const username = Deno.env.get('USER') || 'hmzwsl' // Get current username or use a fallback
+        fsCommand =
+          `wt.exe --maximized -p "Ubuntu" -- wsl -d Ubuntu --cd "${action.path}" -e '/home/${username}/.cargo/bin/yazi'`
         break
       case 'open in neovim oil plugin':
         fsCommand = `nvim "${action.path}"`

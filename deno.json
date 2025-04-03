@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "start": "clear -x; deno run --allow-run ./main.ts",
+    "start": "clear -x; deno run --allow-run --allow-env ./main.ts",
     "dev": "deno run --watch ./main.ts"
   },
   "imports": {
