@@ -192,26 +192,51 @@ async function executeFileSystemAction(
 ): Promise<void> {
   console.log('Executing filesystem action:', action.subType, action.path)
   try {
+    // Process path - convert Windows paths to WSL paths
+    const processPath = (path: string): string => {
+      // Check if it's a Windows path (starts with drive letter followed by colon)
+      if (/^[A-Za-z]:\\/.test(path)) {
+        // Convert Windows path to WSL path using wslpath
+        try {
+          const command = new Deno.Command('wslpath', {
+            args: [path],
+            stdout: 'piped',
+          })
+          const { stdout } = command.outputSync()
+          const wslPath = new TextDecoder().decode(stdout).trim()
+          console.log(
+            `Converted Windows path "${path}" to WSL path "${wslPath}"`,
+          )
+          return wslPath
+        } catch (error) {
+          console.error(`Failed to convert path: ${error}`)
+          return path // Return original path if conversion fails
+        }
+      }
+      return path // Return unchanged if it's not a Windows path
+    }
+
+    const processedPath = processPath(action.path)
     let fsCommand = ''
     switch (action.subType) {
       case 'open in File Explorer':
-        fsCommand = `explorer.exe "$(wslpath -w "${action.path}")"`
+        fsCommand = `explorer.exe "$(wslpath -w "${processedPath}")"`
         break
       case 'open in yazi':
-        const username = Deno.env.get('USER') || 'hmzwsl' // Get current username or use a fallback
+        const username = Deno.env.get('USER') // Get current username or use a fallback
         fsCommand =
-          `wt.exe --maximized -p "Ubuntu" -- wsl -d Ubuntu --cd "${action.path}" -e '/home/${username}/.cargo/bin/yazi'`
+          `wt.exe --maximized -p "Ubuntu" -- wsl -d Ubuntu --cd "${processedPath}" -e '/home/${username}/.cargo/bin/yazi'`
         break
       case 'open in neovim oil plugin':
         const randomSessionId = Math.floor(Math.random() * 10000)
         fsCommand =
-          `wt.exe --maximized -p "Ubuntu" -- wsl -d Ubuntu --cd "${action.path}" -e bash -c "tmux new-session -A -s neovim-oil-${randomSessionId} '/opt/nvim-linux64/bin/nvim +\\"Oil\\"'"`
+          `wt.exe --maximized -p "Ubuntu" -- wsl -d Ubuntu --cd "${processedPath}" -e bash -c "tmux new-session -A -s neovim-oil-${randomSessionId} '/opt/nvim-linux64/bin/nvim +\\"Oil\\"'"`
         break
       case 'open in fish shell':
-        fsCommand = `fish -c "cd \\"${action.path}\\" && exec fish"`
+        fsCommand = `fish -c "cd \\"${processedPath}\\" && exec fish"`
         break
       case 'open in pwsh':
-        fsCommand = `pwsh.exe -NoExit -Command "cd \\"${action.path}\\""`
+        fsCommand = `pwsh.exe -NoExit -Command "cd \\"${processedPath}\\""`
         break
     }
 
